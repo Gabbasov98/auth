@@ -14331,3 +14331,27 @@ ol>li:before {
 .form-group input._required ~ .form-group__error-text .required-error{
     display: block;
 }
+
+.auth__btn{
+    position: relative;
+}
+
+.auth__btn-loader{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    opacity: 0;
+}
+
+.auth__btn-loader span{
+    background-color: #fff;
+}
+
+.auth__btn._load .auth__btn-title{
+    opacity: 0;
+}
+
+.auth__btn._load .auth__btn-loader{
+    opacity: 1;
+}

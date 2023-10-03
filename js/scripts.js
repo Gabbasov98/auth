@@ -4,6 +4,7 @@ import {
     getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
+    sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -30,6 +31,7 @@ let firstname = document.getElementById("firstname")
 let lastname = document.getElementById("lastname")
 let email = document.getElementById("email")
 let password = document.getElementById("password")
+let submitBtn = document.querySelector(".auth__btn")
 
 window.signup = function(e) {
     e.preventDefault();
@@ -41,27 +43,15 @@ window.signup = function(e) {
         firstname.classList.remove("_required")
     }
 
-    if(!isFilled(email)){
-        email.classList.add("_required")
-        return
-    } else{
-        email.classList.remove("_required")
+    if(!emailFieldValidation(email)){
+        return;
     }
 
-    if(!isCorrectPattern(email,patternEmail)){
-        email.classList.add("_incorrect-email")
-        return
-    } else{
-        email.classList.remove("_incorrect-email")
+    if(!passwordFieldValidation(password)){
+        return;
     }
 
-    if(!isFilled(password)){
-        password.classList.add("_required")
-        return
-    } else{
-        password.classList.remove("_required")
-    }
-
+    submitBtn.classList.add("_load")
     let userData = {
         firstname: firstname.value,
         lastname: lastname.value,
@@ -71,6 +61,12 @@ window.signup = function(e) {
 
     createUserWithEmailAndPassword(auth, userData.email, userData.password)
         .then(function(success) {
+            submitBtn.classList.remove("_load")
+            sendEmailVerification(auth.currentUser)
+                .then(() => {
+                    console.log("mess sent")
+                });
+
             window.location.replace(`login.html`);
         })
         .catch(function(err) {
@@ -95,16 +91,7 @@ function isCorrectPattern(input,pattern) {
     return false
 }
 
-
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-analytics.js";
-
-const analytics = getAnalytics(app);
-
-
-window.login= function(e) {
-    e.preventDefault();
-
-
+function emailFieldValidation(email){
     if(!isFilled(email)){
         email.classList.add("_required")
         return
@@ -119,16 +106,33 @@ window.login= function(e) {
         email.classList.remove("_incorrect-email")
     }
 
+    return true
+}
+
+function passwordFieldValidation(password){
     if(!isFilled(password)){
         password.classList.add("_required")
         return
     } else{
         password.classList.remove("_required")
+        return true
+    }
+}
+
+
+window.login= function(e) {
+    e.preventDefault();
+
+
+    if(!emailFieldValidation(email)){
+        return;
     }
 
+    if(!passwordFieldValidation(password)){
+        return;
+    }
 
-
-
+    submitBtn.classList.add("_load")
     let userData = {
         email: email.value,
         password: password.value,
@@ -138,12 +142,8 @@ window.login= function(e) {
         .then(function (success) {
             let userId =  (success.user.uid);
             localStorage.setItem("uid",userId)
-            console.log(userId)
-
-
-
+            submitBtn.classList.remove("_load")
             window.location.replace('user.html')
-            // localStorage.setItem(success,user,uid)
 
         })
         .catch(function (err) {
@@ -160,8 +160,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
     if(document.querySelector(".user-page")){
         if(!localStorage.getItem("uid")){
             window.location.replace('login.html')
-        } else{
-            console.log(true)
         }
     }
 });
